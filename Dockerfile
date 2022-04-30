@@ -1,4 +1,4 @@
-FROM python:3.9.0-buster
+FROM python:3.9.12-buster
 LABEL maintainer="lauwarm@mailbox.org"
 
 ENV streamlinkVersion=3.2.0
