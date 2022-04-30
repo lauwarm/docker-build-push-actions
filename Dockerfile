@@ -3,7 +3,7 @@ MAINTAINER lauwarm <lauwarm@mailbox.org>
 
 ENV version=1.3.0~2961~g1ee050a~snapshot
 
-ADD https://dl.mumble.info/murmur-static_x86-${version}.tar.bz2 /opt/
+ADD https://github.com/mumble-voip/mumble/releases/download/v1.4.230/mumble-1.4.230.tar.gz /opt/
 
 RUN adduser -S murmur && \
     bzcat /opt/murmur-static_x86-${version}.tar.bz2 | tar -x -C /opt -f - && \
