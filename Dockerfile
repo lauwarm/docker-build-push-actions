@@ -1,17 +1,26 @@
-FROM busybox:latest
-MAINTAINER lauwarm <lauwarm@mailbox.org>
+FROM python:3.9.0-buster
+LABEL maintainer="lauwarm@mailbox.org"
 
-ENV version=1.3.0~2961~g1ee050a~snapshot
+ENV streamlinkVersion=3.2.0
 
-ADD https://github.com/mumble-voip/mumble/releases/download/v1.4.230/mumble-1.4.230.tar.gz /opt/
+ADD https://github.com/streamlink/streamlink/releases/download/${streamlinkVersion}/streamlink-${streamlinkVersion}.tar.gz /opt/
 
-RUN adduser -S murmur && \
-    bzcat /opt/murmur-static_x86-${version}.tar.bz2 | tar -x -C /opt -f - && \
-    rm /opt/murmur-static_x86-${version}.tar.bz2 && \
-    mv /opt/murmur-static_x86-${version} /opt/murmur
+RUN apt-get update && apt-get install gosu
 
-COPY murmur.ini /etc/murmur.ini
+RUN tar -xzf /opt/streamlink-${streamlinkVersion}.tar.gz -C /opt/ && \
+	rm /opt/streamlink-${streamlinkVersion}.tar.gz && \
+	cd /opt/streamlink-${streamlinkVersion}/ && \
+	python setup.py install
 
-EXPOSE 64738/tcp 64738/udp
+RUN mkdir /home/download
+RUN mkdir /home/script
+RUN mkdir /home/plugins
 
-CMD ["/opt/murmur/murmur.x86", "-fg", "-v", "-ini", "/etc/murmur.ini"]
+COPY ./streamlink-recorder.sh /home/script/
+COPY ./entrypoint.sh /home/script
+
+RUN ["chmod", "+x", "/home/script/entrypoint.sh"]
+
+ENTRYPOINT [ "/home/script/entrypoint.sh" ]
+
+CMD /bin/sh ./home/script/streamlink-recorder.sh ${streamOptions} ${streamLink} ${streamQuality} ${streamName}
