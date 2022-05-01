@@ -29,3 +29,27 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+    
+  build_latest:
+    name: Build Image with latest tag for Docker Hub
+    runs-on: ubuntu-latest
+    if: GitHub.ref == 'refs/heads/main' || GitHub.event_name == 'release'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Docker Login
+        uses: docker/login-action@v1.14.1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: lauwarm/docker-build-push-actions
+      - name: Build and push Docker image with 'latest' tags
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          tags: 'latest'
+          labels: ${{ steps.meta.outputs.labels }}
